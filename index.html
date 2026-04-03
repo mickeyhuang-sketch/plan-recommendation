@@ -183,7 +183,10 @@
   .plan-card {
     border: 2px solid var(--gray-200); border-radius: 24px; padding: 24px 16px;
     text-align: center; transition: all 0.3s; position: relative; opacity: 0.4; transform: scale(0.9);
+    cursor: pointer;
   }
+  .plan-card:hover { opacity: 0.7; }
+  .plan-card.recommended:hover { opacity: 1; }
   .plan-card.recommended { opacity: 1; transform: scale(1.06); box-shadow: 0 8px 30px rgba(225,44,44,0.15); }
   .plan-card.recommended.standard { border-color: var(--mickey-yellow); border-width: 3px; }
   .plan-card.recommended.pro { border-color: var(--mickey-red); border-width: 3px; }
@@ -193,6 +196,7 @@
     padding: 4px 16px; border-radius: 20px; font-size: 12px; font-weight: 700;
     color: var(--white); display: none;
   }
+  .plan-card .badge:not(:empty) { display: block; }
   .plan-card.recommended .badge { display: block; }
   .plan-card.recommended.standard .badge { background: var(--mickey-yellow); color: var(--mickey-black); }
   .plan-card.recommended.pro .badge { background: var(--mickey-red); }
@@ -349,7 +353,7 @@
     <div class="card">
       <h2 style="text-align:center;">根據您的需求，我們推薦</h2>
       <div class="plan-cards">
-        <div class="plan-card standard" id="card-standard">
+        <div class="plan-card standard" id="card-standard" onclick="selectPlan('standard')">
           <span class="badge">推薦</span>
           <h3>標準版</h3>
           <p style="font-size:13px; color:var(--gray-500); margin-bottom:12px;">Standard</p>
@@ -359,7 +363,7 @@
             <li>月出貨量 10 萬 pcs 不額外收費</li>
           </ul>
         </div>
-        <div class="plan-card pro" id="card-pro">
+        <div class="plan-card pro" id="card-pro" onclick="selectPlan('pro')">
           <span class="badge">推薦</span>
           <h3>專業版</h3>
           <p style="font-size:13px; color:var(--gray-500); margin-bottom:12px;">Pro</p>
@@ -370,7 +374,7 @@
             <li>月出貨量 30 萬 pcs 不額外收費</li>
           </ul>
         </div>
-        <div class="plan-card enterprise" id="card-enterprise">
+        <div class="plan-card enterprise" id="card-enterprise" onclick="selectPlan('enterprise')">
           <span class="badge">推薦</span>
           <h3>企業版</h3>
           <p style="font-size:13px; color:var(--gray-500); margin-bottom:12px;">Enterprise</p>
@@ -525,6 +529,7 @@
 
   let answers = { q1: null, q2: null, q3: null, q4: null, q5: null };
   let recommendedPlan = null;
+  let originalRecommended = null;
   let currentStep = 1;
 
   function showPage(id, step) {
@@ -572,17 +577,31 @@
     }
   }
   function showResult() {
+    originalRecommended = recommendedPlan;
+    updatePlanUI();
+    showPage('page-result', 3);
+  }
+  function updatePlanUI() {
     ['standard', 'pro', 'enterprise'].forEach(plan => {
       const card = document.getElementById('card-' + plan);
+      const badge = card.querySelector('.badge');
       card.classList.remove('recommended');
-      if (plan === recommendedPlan) card.classList.add('recommended');
+      if (plan === recommendedPlan) {
+        card.classList.add('recommended');
+        badge.textContent = (plan === originalRecommended) ? '推薦' : '已選擇';
+      } else {
+        badge.textContent = (plan === originalRecommended) ? '推薦' : '';
+      }
     });
     const cta = document.getElementById('result-cta');
     cta.className = 'btn btn-full';
     if (recommendedPlan === 'standard') cta.classList.add('btn-standard');
     else if (recommendedPlan === 'pro') cta.classList.add('btn-pro');
     else cta.classList.add('btn-enterprise');
-    showPage('page-result', 3);
+  }
+  function selectPlan(plan) {
+    recommendedPlan = plan;
+    updatePlanUI();
   }
   function goToRegister() {
     const names = { standard: '標準版', pro: '專業版', enterprise: '企業版' };
